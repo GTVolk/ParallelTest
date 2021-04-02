@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * FIX THIS SERVICE
@@ -17,12 +18,13 @@ public class MoneyService {
     private final CandidateService candidateService;
 
     public int countMoney() throws ExecutionException, InterruptedException {
-        int[] result = new int[1];
+        AtomicIntegerArray result = new AtomicIntegerArray(1);
+        result.set(0, 0);
         CompletableFuture[] futures = new CompletableFuture[HARDCODED_NUMBER_OF_CANDIDATES];
         for (int i = 1; i <= HARDCODED_NUMBER_OF_CANDIDATES; i++) {
-            futures[i - 1] = candidateService.getMoney(i).thenAccept(money -> result[0] += money);
+            futures[i - 1] = candidateService.getMoney(i).thenAccept(money -> result.addAndGet(0, money));
         }
         CompletableFuture.allOf(futures).get();
-        return result[0];
+        return result.get(0);
     }
 }
